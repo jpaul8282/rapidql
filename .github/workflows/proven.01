@@ -1,0 +1,133 @@
+permissions:
+  id-token: write
+  attestations: write
+- uses: actions/attest-build-provenance@v2
+  with:
+    subject-path: '<PATH TO ARTIFACT>'
+- uses: actions/attest-build-provenance@v2
+  with:
+    # Path to the artifact serving as the subject of the attestation. Must
+    # specify exactly one of "subject-path", "subject-digest", or
+    # "subject-checksums". May contain a glob pattern or list of paths
+    # (total subject count cannot exceed 1024).
+    subject-path:
+
+    # SHA256 digest of the subject for the attestation. Must be in the form
+    # "sha256:hex_digest" (e.g. "sha256:abc123..."). Must specify exactly one
+    # of "subject-path", "subject-digest", or "subject-checksums".
+    subject-digest:
+
+    # Subject name as it should appear in the attestation. Required when
+    # identifying the subject with the "subject-digest" input.
+    subject-name:
+
+    # Path to checksums file containing digest and name of subjects for
+    # attestation. Must specify exactly one of "subject-path", "subject-digest",
+    # or "subject-checksums".
+    subject-checksums:
+
+    # Whether to push the attestation to the image registry. Requires that the
+    # "subject-name" parameter specify the fully-qualified image name and that
+    # the "subject-digest" parameter be specified. Defaults to false.
+    push-to-registry:
+
+    # Whether to attach a list of generated attestations to the workflow run
+    # summary page. Defaults to true.
+    show-summary:
+
+    # The GitHub token used to make authenticated API requests. Default is
+    # ${{ github.token }}
+    github-token:
+name: build-attest
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      attestations: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build artifact
+        run: make my-app
+      - name: Attest
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: '${{ github.workspace }}/my-app'
+- uses: actions/attest-build-provenance@v2
+  with:
+    subject-path: 'dist/**/my-bin-*'
+- uses: actions/attest-build-provenance@v2
+  with:
+    subject-path: 'dist/foo, dist/bar'
+- uses: actions/attest-build-provenance@v2
+  with:
+    subject-path: |
+      dist/foo
+      dist/bar
+- name: Calculate artifact digests
+  run: |
+    shasum -a 256 foo_0.0.1_* > subject.checksums.txt
+- uses: actions/attest-build-provenance@v2
+  with:
+    subject-checksums: subject.checksums.txt
+b569bf992b287f55d78bf8ee476497e9b7e9d2bf1c338860bfb905016218c740  foo_0.0.1_darwin_amd64
+a54fc515e616cac7fcf11a49d5c5ec9ec315948a5935c1e11dd610b834b14dde  foo_0.0.1_darwin_arm64
+name: build-attested-image
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      packages: write
+      contents: read
+      attestations: write
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push image
+        id: push
+        uses: docker/build-push-action@v5.0.0
+        with:
+          context: .
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+      - name: Attest
+        uses: actions/attest-build-provenance@v2
+        id: attest
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
+- name: Upload build artifact
+  id: upload
+  uses: actions/upload-artifact@v4
+  with:
+    path: dist/*
+    name: artifact.zip
+
+- uses: actions/attest-build-provenance@v2
+  with:
+    subject-name: artifact.zip
+    subject-digest: sha256:${{ steps.upload.outputs.artifact-digest }}
