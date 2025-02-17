@@ -1,0 +1,139 @@
+const RapidQL = require('RapidQL');
+let rql = new RapidQL({
+    Http : {
+        X-RapidAPI-Header: '***********'
+    },
+    RapidAPI : {
+        projectName : '########',
+        apiKey: '##########'
+    }
+});
+
+//Running this query on this base context will return the object {a:1}
+rql.query(`
+{
+    a
+}
+`, {
+    a: 1,
+    b: 2
+}).then(console.log).catch(console.warn);
+
+//Running this query on this base context will return the object {a:1}
+rql.log(`
+{
+    a
+}
+`, {
+    a: 1,
+    b: 2
+})
+
+const RapidQL = require('RapidQL');
+const rql = new RapidQL({});  
+
+rql.log(`{
+    Http.get(url:"http://httpbin.org/ip") {
+        origin
+    }
+}`);
+
+const RapidQL = require('RapidQL');
+const rql = new RapidQL({
+    Http: {
+        headers : {
+            'X-RapidAPI-Key' : '*****************',
+            'default' : 'this header will always be sent, unless defined otherwise at time of call'
+        },
+        basic : {
+            username : 'my_username',
+            password : 'my_password'
+        }
+    }
+});
+
+rql.log(`{
+    Http.post(
+        url:"http://httpbin.org/ip"
+    ){
+        
+    }
+}`)
+
+const RapidQL = require('RapidQL');
+const rql = new RapidQL({});
+
+rql.log(`{
+    Http.post(
+        url:"http://httpbin.org/status/{{status_code}}"
+    ){
+      
+    }
+}`, {
+  status_code: 400
+})
+
+rql.log(`{
+  MySQL.public.users.find(username:input) {
+    email,
+    phoneNumber,
+    name,
+    - Telesign:Http.post(
+      url: 'https://telesign-telesign-score-v1.p.rapidapi.com/score/{{phoneNumber}}',
+      headers : {
+        'Content-Type' : 'application/x-www-form-urlencoded'
+      },
+      params : {
+        'account_lifecycle_event' : 'create'
+      }
+    ){
+      phone_number_risk : risk
+    },
+    - Mailboxlayer:Http.get(
+      url: 'https://apilayer-mailboxlayer-v1.p.rapidapi.com/check',
+      headers : {
+      },
+      params : {
+        smtp: '1',
+        catch_all: '0',
+        email: email,
+        access_key: '************************'
+      }
+    ){
+      email_score:score
+    }
+  }
+}` , {
+  input : 'rapidapi'
+})
+
+const RapidQL = require('RapidQL');
+const rql = new RapidQL({
+    PostgreSQL: {
+        Sample: {
+            user: 'admin', //required
+            database: 'compose', //required
+            password: '#########', //required
+            host: 'aws-us-east-1-portal.23.dblayer.com', // required
+            port: 17052, //required
+            max: 10, // optional - max connections
+            idleTimeoutMillis: 30000 // optional - how long a client is allowed to remain idle before being closed
+        }
+    }
+});
+
+DBType.DBName.Schema.Table.Operation
+
+
+PostgreSQL.Sample.public.users.select(location: "US")
+PostgreSQL.Sample.public.users.select(birthyear: {"<=": "1997"})
+PostgreSQL.Sample.public.users.select(location: 'US', birthyear: {"<=": "1997"})
+PostgreSQL.Sample.public.users.select(WHERE:{"location": "US"}, LIMIT:"3", SKIP:"1", ORDERBY: {birthyear:"DESC"})
+{
+    PostgreSQL.GCELogs.public.blockcalls.count(LIMIT:"10", GROUPBY:"package", ORDERBY:{count:"DESC"}) {
+        package,
+        count
+    }
+}
+
+rql queryFile.rql
