@@ -1,0 +1,44 @@
+{
+  "name": "rapidql",
+  "version": "0.0.6",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/mocha/bin/mocha  --recursive",
+    "run": "nyc mocha --recursive"
+  },
+  "engines": {
+    "node": "6.1.0"
+  },
+  "bin": {
+    "rql": "bin/rql.js",
+    "rql-server": "bin/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "cacheman": "^2.2.1",
+    "chai": "^4.1.0",
+    "chai-as-promised": "^7.1.1",
+    "commander": "^2.11.0",
+    "csv": "^2.0.0",
+    "dnscache": "^1.0.1",
+    "mocha": "^7.0.0",
+    "mocha-testcheck": "^1.0.0-rc.0",
+    "mongodb": "^2.2.30",
+    "mustache": "^2.2.1",
+    "mysql": "^2.13.0",
+    "nearley": "^2.7.10",
+    "nyc": "^15.0.0",
+    "object-hash": "^1.2.0",
+    "pegjs": "^0.10.0",
+    "pg": "^6.1.2",
+    "query-string": "^4.3.4",
+    "rapidapi-connect": "0.0.4",
+    "redis": "^2.7.1",
+    "request": "^2.81.0",
+    "simple-rate-limiter": "^0.2.3",
+    "testcheck": "^1.0.0-rc.2"
+  }
+}
